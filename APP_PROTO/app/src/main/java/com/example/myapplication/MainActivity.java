@@ -3,14 +3,25 @@ package com.example.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
+import org.opencv.android.OpenCVLoader;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MainActivity";
 
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "OpenCV is not loaded");
+        } else {
+            Log.d(TAG, "OpenCV is loaded successfully!");
+        }
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

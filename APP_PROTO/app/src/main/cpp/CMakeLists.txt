@@ -3,6 +3,10 @@
 
 # Sets the minimum version of CMake required to build the native library.
 
+include_directories(${OpenCV_DIR}/jni/include)
+add_library( lib_opencv SHARED IMPORTED )
+set_target_properties(lib_opencv PROPERTIES IMPORTED_LOCATION ${OpenCV_DIR}/libs/${ANDROID_ABI}/libopencv_java4.so)
+
 cmake_minimum_required(VERSION 3.10.2)
 
 # Declares and names the project.
@@ -45,4 +49,5 @@ target_link_libraries( # Specifies the target library.
 
                        # Links the target library to the log library
                        # included in the NDK.
+                        lib_opencv
                        ${log-lib} )

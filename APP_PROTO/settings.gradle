@@ -1,3 +1,4 @@
 include ':opencv'
+project(':opencv').projectDir = new File(opencvsdk + '/')
 include ':app'
 rootProject.name = "My Application"

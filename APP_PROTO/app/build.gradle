@@ -16,7 +16,9 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags ""
+                cppFlags "-frtti -fexceptions"
+                abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+                arguments "-DOpenCV_DIR=" + opencvsdk + "/native"
             }
         }
     }
@@ -40,9 +42,15 @@ android {
     sourceSets {
         main {
             jni {
-                srcDirs 'src/main/jni', 'src/main/jniLibs'
+                srcDirs 'src/main/jniLibs'
             }
         }
+    }
+    packagingOptions {
+        pickFirst 'lib/armeabi-v7a/libopencv_java4.so'
+        pickFirst 'lib/arm64-v8a/libopencv_java4.so'
+        pickFirst 'lib/x86/libopencv_java4.so'
+        pickFirst 'lib/x86_64/libopencv_java4.so'
     }
 }
 

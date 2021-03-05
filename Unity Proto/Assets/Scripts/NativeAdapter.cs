@@ -37,12 +37,19 @@ public class NativeAdapter
 
     static NativeAdapter() {
         string currentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
-        dllPath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + "Assets" + Path.DirectorySeparatorChar + "Plugins";
-        Debug.Log(dllPath);
+        dllPath = Path.DirectorySeparatorChar + "Assets" + Path.DirectorySeparatorChar + "Plugins";
+        Debug.Log("dllPath " + dllPath);
+        Debug.Log("currentPath " + currentPath);
+        Debug.Log("process " + EnvironmentVariableTarget.Process);
         if(currentPath.Contains(dllPath) == false)
         {
-            Environment.SetEnvironmentVariable("PATH", currentPath + Path.PathSeparator + dllPath, EnvironmentVariableTarget.Process);
+            #if !UNITY_EDITOR
+                Environment.SetEnvironmentVariable("PATH", currentPath + Path.PathSeparator + dllPath, EnvironmentVariableTarget.Process);
+            #elif UNITY_EDITOR
+                Environment.SetEnvironmentVariable("PATH", currentPath + Path.PathSeparator + dllPath, EnvironmentVariableTarget.Process);
+            #endif
         }
+        Debug.Log("env " + Environment.GetEnvironmentVariable("PATH"));
     }
 
     public static int FooTest() {

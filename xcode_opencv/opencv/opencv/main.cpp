@@ -22,11 +22,11 @@ int main(int argc, const char * argv[]) {
     Mat img = imread("/Users/stories2/Documents/GitHub/Kangnam-AR/IMG_3965.jpg", IMREAD_COLOR);
     imshow("img", img);
     
-    
-    float ratio = 700.0 / img.size().height;
+    float maxImgWidth = 2000.0;
+    float ratio = maxImgWidth / img.size().height;
     
     Mat smallImg;
-    resize(img, smallImg, Size(int(img.size().width * ratio), 700));
+    resize(img, smallImg, Size(int(img.size().width * ratio), maxImgWidth));
     
     imshow("smallImg", smallImg);
     
@@ -73,8 +73,86 @@ int main(int argc, const char * argv[]) {
     drawContours(smallImg_copy, screenContours_vec, -1, CV_RGB(0, 255, 0), 2);
     imshow("contours", smallImg_copy);
     
+    Point topLeft, topRight, bottomRight, bottomLeft;
+    topLeft.x = 0x0fffffff;
+    topLeft.y = 0x0fffffff;
+    
+    topRight.y = 0x7fffffff;
+    
+    for (unsigned long i = 0; i < screenContours.size(); i++) {
+        if (topLeft.x + topLeft.y > screenContours[i].x + screenContours[i].y) {
+            topLeft = screenContours[i];
+        }
+        
+        if (topRight.y - topRight.x > screenContours[i].y - screenContours[i].x) {
+            topRight = screenContours[i];
+        }
+        
+        if (bottomRight.x + bottomRight.y < screenContours[i].x + screenContours[i].y) {
+            bottomRight = screenContours[i];
+        }
+        
+        if (bottomLeft.y - bottomLeft.x < screenContours[i].y - screenContours[i].x) {
+            bottomLeft = screenContours[i];
+        }
+    }
+    
+    unsigned long padding = 10;
+    topLeft.x += padding;
+    topLeft.y += padding;
+    topRight.x -= padding;
+    topRight.y += padding;
+    bottomLeft.x += padding;
+    bottomLeft.y -= padding;
+    bottomRight.x -= padding;
+    bottomRight.y -= padding;
+    
+    unsigned long width1 = abs(topLeft.x - topRight.x), width2 = abs(bottomLeft.x - bottomRight.x),
+                    height1 = abs(topLeft.y - bottomLeft.y), height2 = abs(topRight.y - bottomRight.y);
+    
+    unsigned long maxWidth = max(width1, width2), maxHeight = max(height1, height2);
+    
+    vector<Point2f> srcRect;
+    srcRect.push_back(topLeft);
+    srcRect.push_back(topRight);
+    srcRect.push_back(bottomLeft);
+    srcRect.push_back(bottomRight);
+    
+    vector<Point2f> destRect;
+    destRect.push_back(Point(0, 0));
+    destRect.push_back(Point(maxWidth, 0));
+    destRect.push_back(Point(0, maxHeight));
+    destRect.push_back(Point(maxWidth, maxHeight));
+    
+    Mat perspectMat = getPerspectiveTransform(srcRect, destRect);
+    Mat warpedImg;
+    warpPerspective(smallImg, warpedImg, perspectMat, Size(maxWidth, maxHeight));
+    imshow("warpedImg", warpedImg);
+    
+    Mat warpedImgGray;
+    cvtColor(warpedImg, warpedImgGray, COLOR_BGR2GRAY);
+    adaptiveThreshold(warpedImgGray, warpedImgGray, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 21, 10);
+    imshow("adapted", warpedImgGray);
+    
+    Mat edgePic;
+    GaussianBlur(warpedImgGray, edgePic, Size(11, 11), BORDER_CONSTANT);
+    Canny(edgePic, edgePic, 100, 200);
+    imshow("edgePic", edgePic);
+    
+    vector<vector<Point>> contoursPic;
+    vector<Vec4i> hierarchyPic;
+    findContours( edgePic, contoursPic, hierarchyPic, RETR_LIST, CHAIN_APPROX_SIMPLE );
+    
+    Mat edgePic_copy = warpedImg.clone();
+    drawContours(edgePic_copy, contoursPic, -1, CV_RGB(0, 255, 0), 2);
+    imshow("edgePic_copy", edgePic_copy);
+    
     waitKey(0);
     
+    edgePic_copy.release();
+    edgePic.release();
+    warpedImgGray.release();
+    warpedImg.release();
     smallImg_copy.release();
     edge.release();
     grayBlur.release();

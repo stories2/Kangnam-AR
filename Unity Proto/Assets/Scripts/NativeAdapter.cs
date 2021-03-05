@@ -45,11 +45,12 @@ public class NativeAdapter
         {
             #if !UNITY_EDITOR
                 Environment.SetEnvironmentVariable("PATH", currentPath + Path.PathSeparator + dllPath, EnvironmentVariableTarget.Process);
+                Debug.Log("env " + Environment.GetEnvironmentVariable("PATH"));
             #elif UNITY_EDITOR
                 Environment.SetEnvironmentVariable("PATH", currentPath + Path.PathSeparator + dllPath, EnvironmentVariableTarget.Process);
+                Debug.Log("env " + Environment.GetEnvironmentVariable("PATH"));
             #endif
         }
-        Debug.Log("env " + Environment.GetEnvironmentVariable("PATH"));
     }
 
     public static int FooTest() {

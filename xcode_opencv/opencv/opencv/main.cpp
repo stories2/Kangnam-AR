@@ -147,8 +147,14 @@ int main(int argc, const char * argv[]) {
     drawContours(edgePic_copy, contoursPic, -1, CV_RGB(0, 255, 0), 2);
     imshow("edgePic_copy", edgePic_copy);
     
+    Mat onlyContours = Mat(Size(edgePic_copy.cols, edgePic_copy.rows), CV_8UC3);
+    drawContours(onlyContours, contoursPic, -1, CV_RGB(255, 255, 255), 2);
+    cvtColor(onlyContours, onlyContours, COLOR_BGR2GRAY);
+    imshow("onlyContours", onlyContours);
+    
     waitKey(0);
     
+    onlyContours.release();
     edgePic_copy.release();
     edgePic.release();
     warpedImgGray.release();

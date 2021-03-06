@@ -8,16 +8,16 @@ using System.IO;
 public class NativeAdapter
 {
     #if !UNITY_EDITOR
-        [DllImport("native-lib")]
+        [DllImport("OpenCVPlugin")]
         private static extern int FooTestFunction_Internal();
 
-        [DllImport("native-lib")]
+        [DllImport("OpenCVPlugin")]
         private static extern int ResultPicBufferRows();
 
-        [DllImport("native-lib")]
+        [DllImport("OpenCVPlugin")]
         private static extern int ResultPicBufferCols();
 
-        [DllImport("native-lib")]
+        [DllImport("OpenCVPlugin")]
         private static extern IntPtr ExportPicFromDoc(int width, int height, IntPtr bufferAddr);
     #elif UNITY_EDITOR
         [DllImport ("UnityPlugin")]

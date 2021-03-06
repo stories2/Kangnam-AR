@@ -71,10 +71,7 @@ extern "C" {
     }
 
     void FreeBuffer() {
-        if (picRows * picCols > 0) {
-            fill_n(resultPicBuffer, picRows * picCols * 4, 0);
-            delete [] resultPicBuffer;
-        }
+        delete [] resultPicBuffer;
     }
 
     void TestMat(int width, int height, unsigned char* data) {
@@ -252,10 +249,10 @@ extern "C" {
         drawContours(edgePic_copy, contoursPic, -1, CV_RGB(0, 255, 0), 2);
     //        imshow("edgePic_copy", edgePic_copy);
 
-        Mat onlyContours = Mat(Size(edgePic_copy.cols, edgePic_copy.rows), CV_8UC4);
-        drawContours(onlyContours, contoursPic, -1, CV_RGB(255, 255, 255), 2);
+        Mat onlyContours = Mat(Size(edgePic_copy.cols, edgePic_copy.rows), CV_8UC4, 0.0);
+        drawContours(onlyContours, contoursPic, -1, (255, 255, 255, 255), 2);
 
-        cv::cvtColor(onlyContours, onlyContours, COLOR_RGB2BGRA);
+//    cv::cvtColor(onlyContours, onlyContours, COLOR_RGB2BGRA);
 //    std::vector<cv::Mat> bgra;
 //    cv::split(onlyContours, bgra);
 //    std::swap(bgra[0], bgra[3]);

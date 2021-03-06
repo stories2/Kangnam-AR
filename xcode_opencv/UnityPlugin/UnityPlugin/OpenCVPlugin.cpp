@@ -272,6 +272,52 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
         picCols = onlyContours.cols;
         resultPicBuffer = new unsigned char[picRows * picCols * 4];
     } else if (onlyContours.rows <= 0 || onlyContours.cols <= 0) {
+        FreeBuffer();
+        picRows = 0;
+        picCols = 0;
+        
+        for (int i = 0; i < contours.size(); i++) {
+            vector<Point>().swap(contours[i]);
+        }
+        vector<vector<Point>>().swap(contours);
+        
+        vector<Vec4i>().swap(hierarchy);
+        
+        for (int i = 0; i < topContours.size(); i++) {
+            vector<Point>().swap(topContours[i]);
+        }
+        vector<vector<Point>>().swap(topContours);
+        
+        vector<Point>().swap(screenContours);
+        
+        for (int i = 0; i < screenContours_vec.size(); i++) {
+            vector<Point>().swap(screenContours_vec[i]);
+        }
+        vector<vector<Point>>().swap(screenContours_vec);
+        
+        vector<Point2f>().swap(srcRect);
+        
+        vector<Point2f>().swap(destRect);
+        
+        for (int i = 0; i < contoursPic.size(); i++) {
+            vector<Point>().swap(contoursPic[i]);
+        }
+        vector<vector<Point>>().swap(contoursPic);
+        
+        vector<Vec4i>().swap(hierarchyPic);
+
+        onlyContours.release();
+        edgePic_copy.release();
+        edgePic.release();
+        warpedImgGray.release();
+        warpedImg.release();
+        perspectMat.release();
+        smallImg_copy.release();
+        edge.release();
+        grayBlur.release();
+        gray.release();
+        smallImg.release();
+        img.release();
         return 0;
     }
 //    picRows = onlyContours.rows;

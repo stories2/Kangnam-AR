@@ -56,17 +56,17 @@ public class TestController : MonoBehaviour
             // resultTexture.Apply();
 
             int bufferSize = w * h * 4;
-            byte[] rawData = new byte[bufferSize];
 
             if (testPtr != IntPtr.Zero)
             {
+                byte[] rawData = new byte[bufferSize];
                 Marshal.Copy(testPtr, rawData, 0, bufferSize);
 
                 resultTexture.LoadRawTextureData(rawData);
                 resultTexture.Apply();
             }
 
-            NativeAdapter._FreeBuffer();
+            // NativeAdapter._FreeBuffer();
 
             OutImage.texture = resultTexture;
 
@@ -77,6 +77,7 @@ public class TestController : MonoBehaviour
             if (pixelHandle != null) {
                 pixelHandle.Free();
             }
+            GC.Collect();
         }
     }
 }

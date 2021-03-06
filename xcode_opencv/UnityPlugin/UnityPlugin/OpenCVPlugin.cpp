@@ -57,7 +57,9 @@ unsigned char* GetResultPicBuffer() {
 }
 
 void FreeBuffer() {
-    delete [] resultPicBuffer;
+    if (picRows * picCols > 0) {
+        delete [] resultPicBuffer;
+    }
 }
 
 void TestMat(int width, int height, unsigned char* data) {
@@ -139,6 +141,8 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
             screenContours = approx;
             break;
         }
+        
+        vector<Point>().swap(approx);
     }
 
     if (screenContours.size() <= 0) {
@@ -237,9 +241,19 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 //    std::swap(bgra[1], bgra[2]);
 //    cvtColor(onlyContours, onlyContours, COLOR_BGR2GRAY);
 //        imshow("onlyContours", onlyContours);
-
-    picRows = onlyContours.rows;
-    picCols = onlyContours.cols;
+    int lastPicRows = picRows, lastPicCols = picCols;
+    if (onlyContours.rows > 0 && onlyContours.rows != lastPicRows && onlyContours.cols > 0 && onlyContours.cols != lastPicCols) {
+        FreeBuffer();
+        picRows = onlyContours.rows;
+        picCols = onlyContours.cols;
+        resultPicBuffer = new unsigned char[picRows * picCols * 4];
+    } else if (onlyContours.rows <= 0 || onlyContours.cols <= 0) {
+        return 0;
+    }
+//    picRows = onlyContours.rows;
+//    picCols = onlyContours.cols;
+//    resultPicBuffer = new unsigned char[picRows * picCols * 4];
+    fill_n(resultPicBuffer, picRows * picCols * 4, 0);
     
 //    globalMat = onlyContours.clone();
     
@@ -247,10 +261,38 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 
 //    size_t size = picRows * picCols * 3;
 //    memcpy(resultPicBuffer, onlyContours.data, size);
-    resultPicBuffer = new unsigned char[picRows * picCols * 4];
-    fill_n(resultPicBuffer, picRows * picCols * 4, 0);
 //    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
     memcpy(resultPicBuffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
+    
+    for (int i = 0; i < contours.size(); i++) {
+        vector<Point>().swap(contours[i]);
+    }
+    vector<vector<Point>>().swap(contours);
+    
+    vector<Vec4i>().swap(hierarchy);
+    
+    for (int i = 0; i < topContours.size(); i++) {
+        vector<Point>().swap(topContours[i]);
+    }
+    vector<vector<Point>>().swap(topContours);
+    
+    vector<Point>().swap(screenContours);
+    
+    for (int i = 0; i < screenContours_vec.size(); i++) {
+        vector<Point>().swap(screenContours_vec[i]);
+    }
+    vector<vector<Point>>().swap(screenContours_vec);
+    
+    vector<Point2f>().swap(srcRect);
+    
+    vector<Point2f>().swap(destRect);
+    
+    for (int i = 0; i < contoursPic.size(); i++) {
+        vector<Point>().swap(contoursPic[i]);
+    }
+    vector<vector<Point>>().swap(contoursPic);
+    
+    vector<Vec4i>().swap(hierarchyPic);
 
     onlyContours.release();
     edgePic_copy.release();

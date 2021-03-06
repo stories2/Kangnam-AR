@@ -15,7 +15,7 @@ public class TestController : MonoBehaviour
     {
         txt.text = "Loading native lib";
         txt2.text = NativeAdapter.dllPath;
-        GCHandle pixelHandle;
+        GCHandle pixelHandle, resultPixelHandle;
         try {
             txt.text = "Native: " + NativeAdapter.FooTest().ToString();
 
@@ -29,7 +29,7 @@ public class TestController : MonoBehaviour
             Debug.Log("pixelPtr" + pixelPtr.ToString());
             IntPtr testPtr = NativeAdapter.PicFromDoc(rawImageTexture.width, rawImageTexture.height, pixelPtr);
             Debug.Log("pixelPtr" + pixelPtr.ToString());
-            Debug.Log("testPtr" + testPtr.ToString());
+            Debug.Log("testPtr" + testPtr.ToString() + " test2: " + NativeAdapter._GetResultPicBuffer());
             // NativeAdapter._TestMat(rawImageTexture.width, rawImageTexture.height, pixelPtr);
             // NativeAdapter._TestMat(rawImageTexture.width, rawImageTexture.height, pixelPtr);
             // rawImageTexture.SetPixels32(pixels);
@@ -41,20 +41,30 @@ public class TestController : MonoBehaviour
             rawImageTexture.Apply();
             InImage.texture = rawImageTexture;
 
-            int w = NativeAdapter.PicBufferRows();
-            int h = NativeAdapter.PicBufferCols();
+            int nativeH = NativeAdapter.PicBufferRows();
+            int nativeW = NativeAdapter.PicBufferCols();
+            int w = rawImageTexture.width;
+            int h = rawImageTexture.height;
+            w = nativeW;
+            h = nativeH;
 
-            Debug.Log($"Result w: {w} h: {h}");
-            txt.text = $"Result w: {w} h: {h}";
+            Debug.Log($"Result w: {w} h: {h} nativeW: {nativeW} nativeH: {nativeH}");
+            txt.text = $"Result w: {w} h: {h} nativeW: {nativeW} nativeH: {nativeH}";
 
             Texture2D resultTexture = new Texture2D(w, h, TextureFormat.ARGB32, false);
+            // Color32[] resultPixels = resultTexture.GetPixels32();
+            // resultPixelHandle = GCHandle.Alloc(resultPixels, GCHandleType.Pinned);
+            // IntPtr resultPixelPtr = resultPixelHandle.AddrOfPinnedObject();
+            // NativeAdapter._ReturnGlobalMat(resultPixelPtr);
+            // resultTexture.SetPixels32(resultPixels);
+            // resultTexture.Apply();
 
             int bufferSize = w * h * 4;
             byte[] rawData = new byte[bufferSize];
 
-            if (pixelPtr != IntPtr.Zero)
+            if (testPtr != IntPtr.Zero)
             {
-                Marshal.Copy(pixelPtr, rawData, 0, bufferSize);
+                Marshal.Copy(testPtr, rawData, 0, bufferSize);
 
                 resultTexture.LoadRawTextureData(rawData);
                 resultTexture.Apply();

@@ -29,4 +29,5 @@ extern "C" bool compareContourAreas (std::vector<cv::Point>, std::vector<cv::Poi
 extern "C" unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer);
 extern "C" void FlipImage(Color32 **rawImage, int width, int height);
 extern "C" void TestMat(int width, int height, unsigned char* data);
+extern "C" void ReturnGlobalMat(unsigned char* data);
 #endif //MY_APPLICATION_OPENCVPLUGIN_H

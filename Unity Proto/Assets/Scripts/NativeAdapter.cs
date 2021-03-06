@@ -22,6 +22,9 @@ public class NativeAdapter
 
         [DllImport ("OpenCVPlugin")]
         private static extern void FlipImage(ref Color32[] rawImage, int width, int height);
+
+        [DllImport ("OpenCVPlugin")]
+        private static extern void ReturnGlobalMat(IntPtr data);
     #elif UNITY_EDITOR
         [DllImport ("UnityPlugin")]
         private static extern int FooTestFunction_Internal();
@@ -40,6 +43,12 @@ public class NativeAdapter
 
         [DllImport ("UnityPlugin")]
         private static extern void FlipImage(ref Color32[] rawImage, int width, int height);
+
+        [DllImport ("UnityPlugin")]
+        private static extern void ReturnGlobalMat(IntPtr data);
+
+        [DllImport ("UnityPlugin")]
+        private static extern IntPtr GetResultPicBuffer();
     #endif
 
     public static string dllPath;
@@ -89,5 +98,17 @@ public class NativeAdapter
 
     public static void _FlipImage(ref Color32[] rawImage, int width, int height) {
         FlipImage(ref rawImage, width, height);
+    }
+
+    public static void _ReturnGlobalMat(IntPtr bufferAddr) {
+        ReturnGlobalMat(bufferAddr);
+    }
+
+    public static IntPtr _GetResultPicBuffer() {
+        #if UNITY_EDITOR
+            return GetResultPicBuffer();
+        #else
+            return IntPtr.Zero;
+        #endif
     }
 }

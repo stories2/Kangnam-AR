@@ -4,9 +4,13 @@ extern "C" {
     using namespace cv;
     using namespace std;
     //global variables
+    unsigned char* resultPicBuffer;
     uint8_t *resultBuffer;
     int bufferWidth;
     int bufferHeight;
+    Mat globalMat;
+    int picRows = 0;
+    int picCols = 0;
     // In order to save memory, we call this method to initialize our buffer to the
     // size actually needed by Unity assuming that we will not resize our video buffer
     int InitCV_Internal(int width, int height) {
@@ -49,10 +53,6 @@ extern "C" {
         return 12345;
     }
 
-    uint8_t  *resultPicBuffer;
-    int picRows = 0;
-    int picCols = 0;
-
     int ResultPicBufferRows() {
         return picRows;
     }
@@ -64,6 +64,10 @@ extern "C" {
     void FlipImage(Color32 **rawImage, int width, int height) {
         Mat image(height, width, CV_8UC4, *rawImage);
         flip(image, image, -1);
+    }
+
+    void ReturnGlobalMat(unsigned char* data) {
+        memcpy(data, globalMat.data, globalMat.total() * globalMat.elemSize());
     }
 
     void TestMat(int width, int height, unsigned char* data) {
@@ -223,21 +227,25 @@ extern "C" {
         drawContours(onlyContours, contoursPic, -1, CV_RGB(255, 255, 255), 2);
 
         cv::cvtColor(onlyContours, onlyContours, COLOR_RGB2BGRA);
-        std::vector<cv::Mat> bgra;
-        cv::split(onlyContours, bgra);
-        std::swap(bgra[0], bgra[3]);
-        std::swap(bgra[1], bgra[2]);
-    //    cvtColor(onlyContours, onlyContours, COLOR_BGR2GRAY);
-    //        imshow("onlyContours", onlyContours);
+//    std::vector<cv::Mat> bgra;
+//    cv::split(onlyContours, bgra);
+//    std::swap(bgra[0], bgra[3]);
+//    std::swap(bgra[1], bgra[2]);
+//    cvtColor(onlyContours, onlyContours, COLOR_BGR2GRAY);
+//        imshow("onlyContours", onlyContours);
 
         picRows = onlyContours.rows;
         picCols = onlyContours.cols;
 
-    //    buffer = onlyContours.data;
+        globalMat = onlyContours.clone();
 
-        size_t size = picRows * picCols * 3;
-    //    memcpy(resultPicBuffer, onlyContours.data, size);
-        memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
+//    buffer = onlyContours.data;
+
+//    size_t size = picRows * picCols * 3;
+//    memcpy(resultPicBuffer, onlyContours.data, size);
+        resultPicBuffer = new unsigned char[picRows * picCols * 4];
+//    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
+        memcpy(resultPicBuffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
 
         onlyContours.release();
         edgePic_copy.release();
@@ -251,7 +259,7 @@ extern "C" {
         smallImg.release();
         img.release();
 
-        return buffer;
+        return resultPicBuffer;
     }
 
     bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 ) {

@@ -25,15 +25,42 @@ public class TestController : MonoBehaviour
 
             pixelHandle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
             Debug.Log("Addr: " + pixelHandle.ToString());
-            // IntPtr results = NativeAdapter.PicFromDoc(rawImageTexture.width, rawImageTexture.height, ref pixels);
-            // IntPtr results = NativeAdapter._TestMat(rawImageTexture.width, rawImageTexture.height, pixelHandle.AddrOfPinnedObject());
-            NativeAdapter._FlipImage(ref pixels, rawImageTexture.width, rawImageTexture.height);
+            IntPtr pixelPtr = pixelHandle.AddrOfPinnedObject();
+            Debug.Log("pixelPtr" + pixelPtr.ToString());
+            IntPtr testPtr = NativeAdapter.PicFromDoc(rawImageTexture.width, rawImageTexture.height, pixelPtr);
+            Debug.Log("pixelPtr" + pixelPtr.ToString());
+            Debug.Log("testPtr" + testPtr.ToString());
+            // NativeAdapter._TestMat(rawImageTexture.width, rawImageTexture.height, pixelPtr);
+            // NativeAdapter._TestMat(rawImageTexture.width, rawImageTexture.height, pixelPtr);
+            // rawImageTexture.SetPixels32(pixels);
+            // rawImageTexture.Apply();
+
+            // NativeAdapter._FlipImage(ref pixels, rawImageTexture.width, rawImageTexture.height);
 
             rawImageTexture.SetPixels32(pixels);
             rawImageTexture.Apply();
+            InImage.texture = rawImageTexture;
 
-            Debug.Log("Result w: " + NativeAdapter.PicBufferRows().ToString() + " h: " + NativeAdapter.PicBufferCols().ToString());
-            txt.text = "Result w: " + NativeAdapter.PicBufferRows().ToString() + " h: " + NativeAdapter.PicBufferCols().ToString();
+            int w = NativeAdapter.PicBufferRows();
+            int h = NativeAdapter.PicBufferCols();
+
+            Debug.Log($"Result w: {w} h: {h}");
+            txt.text = $"Result w: {w} h: {h}";
+
+            Texture2D resultTexture = new Texture2D(w, h, TextureFormat.ARGB32, false);
+
+            int bufferSize = w * h * 4;
+            byte[] rawData = new byte[bufferSize];
+
+            if (pixelPtr != IntPtr.Zero)
+            {
+                Marshal.Copy(pixelPtr, rawData, 0, bufferSize);
+
+                resultTexture.LoadRawTextureData(rawData);
+                resultTexture.Apply();
+            }
+
+            OutImage.texture = resultTexture;
 
         } catch (System.Exception e) {
             txt.text = e.Message;

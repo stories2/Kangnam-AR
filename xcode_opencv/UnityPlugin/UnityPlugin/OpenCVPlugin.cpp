@@ -12,10 +12,6 @@
 using namespace std;
 using namespace cv;
 
-uint8_t  *resultPicBuffer;
-int picRows = 0;
-int picCols = 0;
-
 struct Color32
 {
     uchar red;
@@ -24,13 +20,18 @@ struct Color32
     uchar alpha;
 };
 
+uint8_t  *resultPicBuffer;
+Color32 **resultColor32;
+int picRows = 0;
+int picCols = 0;
+
 extern "C" {
     int FooTestFunction_Internal();
     int ResultPicBufferRows();
     int ResultPicBufferCols();
     bool compareContourAreas (std::vector<cv::Point>, std::vector<cv::Point>);
-    uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer);
-    uint8_t *TestMat(int width, int height, uint8_t *buffer);
+    unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer);
+    void TestMat(int width, int height, unsigned char* data);
     void FlipImage(Color32 **rawImage, int width, int height);
 }
 
@@ -38,23 +39,31 @@ void FlipImage(Color32 **rawImage, int width, int height)
 {
     Mat image(height, width, CV_8UC4, *rawImage);
     flip(image, image, -1);
+    cvtColor(image, image, COLOR_BGRA2GRAY);
+    
+    image.release();
 }
 
-uint8_t *TestMat(int width, int height, uint8_t *buffer) {
+void TestMat(int width, int height, unsigned char* data) {
     
-    if (buffer == NULL) {
+    if (data == NULL) {
         picRows = -1;
         picCols = -1;
-        return 0;
+        return;
     }
     
-    Mat img(height, width, CV_8UC4, buffer);
-    picRows = img.rows;
-    picCols = img.cols;
-
-    size_t size = picRows * picCols * 4;
-    memcpy(resultPicBuffer, img.data, size);
-    return resultPicBuffer;
+    Mat img(height, width, CV_8UC4, data);
+//    Mat gray;
+//    cvtColor(img, gray, COLOR_BGRA2GRAY);
+//    picRows = img.rows;
+//    picCols = img.cols;
+//    *data = *gray.data;
+    
+//    memcpy(data, img.data, img.total() * img.elemSize());
+//    size_t size = picRows * picCols * 4;
+    memcpy(data, img.data, img.total() * img.elemSize());
+//    gray.release();
+    img.release();
 }
 
 int FooTestFunction_Internal() {
@@ -71,7 +80,7 @@ int ResultPicBufferCols() {
 
 bool compareContourAreas (std::vector<cv::Point>, std::vector<cv::Point>);
 
-uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer) {
+unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 
     Mat img(height, width, CV_8UC4, buffer);
 
@@ -202,16 +211,25 @@ uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer) {
     drawContours(edgePic_copy, contoursPic, -1, CV_RGB(0, 255, 0), 2);
 //        imshow("edgePic_copy", edgePic_copy);
 
-    Mat onlyContours = Mat(Size(edgePic_copy.cols, edgePic_copy.rows), CV_8UC3);
+    Mat onlyContours = Mat(Size(edgePic_copy.cols, edgePic_copy.rows), CV_8UC4);
     drawContours(onlyContours, contoursPic, -1, CV_RGB(255, 255, 255), 2);
-    cvtColor(onlyContours, onlyContours, COLOR_BGR2GRAY);
+    
+    cv::cvtColor(onlyContours, onlyContours, COLOR_RGB2BGRA);
+    std::vector<cv::Mat> bgra;
+    cv::split(onlyContours, bgra);
+    std::swap(bgra[0], bgra[3]);
+    std::swap(bgra[1], bgra[2]);
+//    cvtColor(onlyContours, onlyContours, COLOR_BGR2GRAY);
 //        imshow("onlyContours", onlyContours);
 
     picRows = onlyContours.rows;
     picCols = onlyContours.cols;
+    
+//    buffer = onlyContours.data;
 
     size_t size = picRows * picCols * 3;
-    memcpy(resultPicBuffer, onlyContours.data, size);
+//    memcpy(resultPicBuffer, onlyContours.data, size);
+    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
 
     onlyContours.release();
     edgePic_copy.release();
@@ -225,7 +243,7 @@ uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer) {
     smallImg.release();
     img.release();
 
-    return resultPicBuffer;
+    return buffer;
 }
 
 bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 ) {

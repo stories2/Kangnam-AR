@@ -36,7 +36,7 @@ public class NativeAdapter
         private static extern IntPtr ExportPicFromDoc(int width, int height, IntPtr bufferAddr);
 
         [DllImport ("UnityPlugin")]
-        private static extern IntPtr TestMat(int width, int height, IntPtr bufferAddr);
+        private static extern void TestMat(int width, int height, IntPtr bufferAddr);
 
         [DllImport ("UnityPlugin")]
         private static extern void FlipImage(ref Color32[] rawImage, int width, int height);
@@ -81,11 +81,9 @@ public class NativeAdapter
         return ExportPicFromDoc(width, height, bufferAddr);
     }
 
-    public static IntPtr _TestMat(int width, int height, IntPtr bufferAddr) {
+    public static void _TestMat(int width, int height, IntPtr bufferAddr) {
         #if UNITY_EDITOR
-            return ExportPicFromDoc(width, height, bufferAddr);
-        #elif !UNITY_EDITOR
-            return IntPtr.Zero;
+            TestMat(width, height, bufferAddr);
         #endif
     }
 

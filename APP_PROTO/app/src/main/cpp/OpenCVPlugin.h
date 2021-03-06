@@ -26,6 +26,7 @@ extern "C" int FooTestFunction_Internal();
 extern "C" int ResultPicBufferRows();
 extern "C" int ResultPicBufferCols();
 extern "C" bool compareContourAreas (std::vector<cv::Point>, std::vector<cv::Point>);
-extern "C" uint8_t *ExportPicFromDoc(int , int , uint8_t *);
+extern "C" unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer);
 extern "C" void FlipImage(Color32 **rawImage, int width, int height);
+extern "C" void TestMat(int width, int height, unsigned char* data);
 #endif //MY_APPLICATION_OPENCVPLUGIN_H

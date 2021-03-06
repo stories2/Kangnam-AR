@@ -12,6 +12,14 @@
 
 #include <iostream>
 
+struct Color32
+{
+    uchar red;
+    uchar green;
+    uchar blue;
+    uchar alpha;
+};
+
 extern "C" int InitCV_Internal(int , int );
 extern "C" uint8_t *SubmitFrame_Internal(int , int , uint8_t *);
 extern "C" int FooTestFunction_Internal();
@@ -19,4 +27,5 @@ extern "C" int ResultPicBufferRows();
 extern "C" int ResultPicBufferCols();
 extern "C" bool compareContourAreas (std::vector<cv::Point>, std::vector<cv::Point>);
 extern "C" uint8_t *ExportPicFromDoc(int , int , uint8_t *);
+extern "C" void FlipImage(Color32 **rawImage, int width, int height);
 #endif //MY_APPLICATION_OPENCVPLUGIN_H

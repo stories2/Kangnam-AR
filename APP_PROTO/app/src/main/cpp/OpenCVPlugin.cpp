@@ -61,7 +61,10 @@ extern "C" {
         return picCols;
     }
 
-
+    void FlipImage(Color32 **rawImage, int width, int height) {
+        Mat image(height, width, CV_8UC4, *rawImage);
+        flip(image, image, -1);
+    }
 
     uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer) {
 

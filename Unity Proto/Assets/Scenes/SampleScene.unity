@@ -177,7 +177,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: 4e65470b66f9c4fba8de9a6ad9eb55f7, type: 3}
+  m_Texture: {fileID: 2800000, guid: f87c3f84508574ba0980e2dee4c1d395, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -484,6 +484,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   txt: {fileID: 1571561473}
   txt2: {fileID: 1856991568}
+  InImage: {fileID: 177457040}
+  OutImage: {fileID: 1644937461}
 --- !u!1 &1460947403
 GameObject:
   m_ObjectHideFlags: 0

@@ -16,12 +16,45 @@ uint8_t  *resultPicBuffer;
 int picRows = 0;
 int picCols = 0;
 
+struct Color32
+{
+    uchar red;
+    uchar green;
+    uchar blue;
+    uchar alpha;
+};
+
 extern "C" {
     int FooTestFunction_Internal();
     int ResultPicBufferRows();
     int ResultPicBufferCols();
     bool compareContourAreas (std::vector<cv::Point>, std::vector<cv::Point>);
     uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer);
+    uint8_t *TestMat(int width, int height, uint8_t *buffer);
+    void FlipImage(Color32 **rawImage, int width, int height);
+}
+
+void FlipImage(Color32 **rawImage, int width, int height)
+{
+    Mat image(height, width, CV_8UC4, *rawImage);
+    flip(image, image, -1);
+}
+
+uint8_t *TestMat(int width, int height, uint8_t *buffer) {
+    
+    if (buffer == NULL) {
+        picRows = -1;
+        picCols = -1;
+        return 0;
+    }
+    
+    Mat img(height, width, CV_8UC4, buffer);
+    picRows = img.rows;
+    picCols = img.cols;
+
+    size_t size = picRows * picCols * 4;
+    memcpy(resultPicBuffer, img.data, size);
+    return resultPicBuffer;
 }
 
 int FooTestFunction_Internal() {

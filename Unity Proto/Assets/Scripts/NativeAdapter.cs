@@ -25,6 +25,9 @@ public class NativeAdapter
 
         [DllImport ("OpenCVPlugin")]
         private static extern void ReturnGlobalMat(IntPtr data);
+
+        [DllImport ("OpenCVPlugin")]
+        private static extern void FreeBuffer();
     #elif UNITY_EDITOR
         [DllImport ("UnityPlugin")]
         private static extern int FooTestFunction_Internal();
@@ -49,6 +52,9 @@ public class NativeAdapter
 
         [DllImport ("UnityPlugin")]
         private static extern IntPtr GetResultPicBuffer();
+
+        [DllImport ("UnityPlugin")]
+        private static extern void FreeBuffer();
     #endif
 
     public static string dllPath;
@@ -110,5 +116,9 @@ public class NativeAdapter
         #else
             return IntPtr.Zero;
         #endif
+    }
+
+    public static void _FreeBuffer() {
+        FreeBuffer();
     }
 }

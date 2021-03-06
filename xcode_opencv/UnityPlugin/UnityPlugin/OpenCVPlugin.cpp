@@ -33,6 +33,7 @@ extern "C" {
     bool compareContourAreas (std::vector<cv::Point>, std::vector<cv::Point>);
     unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer);
     unsigned char* GetResultPicBuffer();
+    void FreeBuffer();
     void TestMat(int width, int height, unsigned char* data);
     void ReturnGlobalMat(unsigned char* data);
     void FlipImage(Color32 **rawImage, int width, int height);
@@ -53,6 +54,10 @@ void ReturnGlobalMat(unsigned char* data) {
 
 unsigned char* GetResultPicBuffer() {
     return resultPicBuffer;
+}
+
+void FreeBuffer() {
+    delete [] resultPicBuffer;
 }
 
 void TestMat(int width, int height, unsigned char* data) {
@@ -236,13 +241,14 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
     picRows = onlyContours.rows;
     picCols = onlyContours.cols;
     
-    globalMat = onlyContours.clone();
+//    globalMat = onlyContours.clone();
     
 //    buffer = onlyContours.data;
 
 //    size_t size = picRows * picCols * 3;
 //    memcpy(resultPicBuffer, onlyContours.data, size);
     resultPicBuffer = new unsigned char[picRows * picCols * 4];
+    fill_n(resultPicBuffer, picRows * picCols * 4, 0);
 //    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
     memcpy(resultPicBuffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
 
@@ -251,6 +257,7 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
     edgePic.release();
     warpedImgGray.release();
     warpedImg.release();
+    perspectMat.release();
     smallImg_copy.release();
     edge.release();
     grayBlur.release();

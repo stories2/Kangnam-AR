@@ -30,4 +30,5 @@ extern "C" unsigned char* ExportPicFromDoc(int width, int height, unsigned char*
 extern "C" void FlipImage(Color32 **rawImage, int width, int height);
 extern "C" void TestMat(int width, int height, unsigned char* data);
 extern "C" void ReturnGlobalMat(unsigned char* data);
+extern "C" void FreeBuffer();
 #endif //MY_APPLICATION_OPENCVPLUGIN_H

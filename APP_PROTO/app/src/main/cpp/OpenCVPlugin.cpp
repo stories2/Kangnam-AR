@@ -70,6 +70,10 @@ extern "C" {
         memcpy(data, globalMat.data, globalMat.total() * globalMat.elemSize());
     }
 
+    void FreeBuffer() {
+        delete [] resultPicBuffer;
+    }
+
     void TestMat(int width, int height, unsigned char* data) {
 
         if (data == NULL) {
@@ -237,13 +241,14 @@ extern "C" {
         picRows = onlyContours.rows;
         picCols = onlyContours.cols;
 
-        globalMat = onlyContours.clone();
+//        globalMat = onlyContours.clone();
 
 //    buffer = onlyContours.data;
 
 //    size_t size = picRows * picCols * 3;
 //    memcpy(resultPicBuffer, onlyContours.data, size);
         resultPicBuffer = new unsigned char[picRows * picCols * 4];
+        fill_n(resultPicBuffer, picRows * picCols * 4, 0);
 //    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
         memcpy(resultPicBuffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
 
@@ -252,6 +257,7 @@ extern "C" {
         edgePic.release();
         warpedImgGray.release();
         warpedImg.release();
+        perspectMat.release();
         smallImg_copy.release();
         edge.release();
         grayBlur.release();

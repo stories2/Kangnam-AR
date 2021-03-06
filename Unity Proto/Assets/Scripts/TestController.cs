@@ -13,6 +13,12 @@ public class TestController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
         txt.text = "Loading native lib";
         txt2.text = NativeAdapter.dllPath;
         GCHandle pixelHandle, resultPixelHandle;
@@ -30,16 +36,6 @@ public class TestController : MonoBehaviour
             IntPtr testPtr = NativeAdapter.PicFromDoc(rawImageTexture.width, rawImageTexture.height, pixelPtr);
             Debug.Log("pixelPtr" + pixelPtr.ToString());
             Debug.Log("testPtr" + testPtr.ToString() + " test2: " + NativeAdapter._GetResultPicBuffer());
-            // NativeAdapter._TestMat(rawImageTexture.width, rawImageTexture.height, pixelPtr);
-            // NativeAdapter._TestMat(rawImageTexture.width, rawImageTexture.height, pixelPtr);
-            // rawImageTexture.SetPixels32(pixels);
-            // rawImageTexture.Apply();
-
-            // NativeAdapter._FlipImage(ref pixels, rawImageTexture.width, rawImageTexture.height);
-
-            rawImageTexture.SetPixels32(pixels);
-            rawImageTexture.Apply();
-            InImage.texture = rawImageTexture;
 
             int nativeH = NativeAdapter.PicBufferRows();
             int nativeW = NativeAdapter.PicBufferCols();
@@ -70,6 +66,8 @@ public class TestController : MonoBehaviour
                 resultTexture.Apply();
             }
 
+            NativeAdapter._FreeBuffer();
+
             OutImage.texture = resultTexture;
 
         } catch (System.Exception e) {
@@ -80,11 +78,5 @@ public class TestController : MonoBehaviour
                 pixelHandle.Free();
             }
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

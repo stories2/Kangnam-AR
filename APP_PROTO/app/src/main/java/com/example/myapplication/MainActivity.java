@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'native-lib' library on application startup.
     static {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("OpenCVPlugin");
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "OpenCV is not loaded");
         } else {

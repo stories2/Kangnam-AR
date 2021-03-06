@@ -71,7 +71,10 @@ extern "C" {
     }
 
     void FreeBuffer() {
-        delete [] resultPicBuffer;
+        if (picRows * picCols > 0) {
+            fill_n(resultPicBuffer, picRows * picCols * 4, 0);
+            delete [] resultPicBuffer;
+        }
     }
 
     void TestMat(int width, int height, unsigned char* data) {
@@ -142,8 +145,30 @@ extern "C" {
         }
 
         if (screenContours.size() <= 0) {
+            FreeBuffer();
             picRows = 0;
             picCols = 0;
+
+            for (int i = 0; i < contours.size(); i++) {
+                vector<Point>().swap(contours[i]);
+            }
+            vector<vector<Point>>().swap(contours);
+
+            vector<Vec4i>().swap(hierarchy);
+
+            for (int i = 0; i < topContours.size(); i++) {
+                vector<Point>().swap(topContours[i]);
+            }
+            vector<vector<Point>>().swap(topContours);
+
+            vector<Point>().swap(screenContours);
+
+            smallImg_copy.release();
+            edge.release();
+            grayBlur.release();
+            gray.release();
+            smallImg.release();
+            img.release();
             return 0;
         }
 

@@ -48,30 +48,6 @@ public class NativeAdapter
         if(currentPath.Contains(dllPath) == false)
         {
             #if !UNITY_EDITOR
-                string[] dict = new string[]{
-                    "Assets" + Path.DirectorySeparatorChar + "Plugins",
-                    "Assets" + Path.DirectorySeparatorChar + "Plugins" + Path.DirectorySeparatorChar + "lib",
-                    Path.DirectorySeparatorChar + "Assets" + Path.DirectorySeparatorChar + "Plugins",
-                    Path.DirectorySeparatorChar + "Assets" + Path.DirectorySeparatorChar + "Plugins" + Path.DirectorySeparatorChar + "lib",
-                    Application.dataPath,
-                    Application.dataPath + Path.DirectorySeparatorChar + "lib",
-                    Application.dataPath + Path.DirectorySeparatorChar + "Assets",
-                    Application.dataPath + Path.DirectorySeparatorChar + "Assets" + Path.DirectorySeparatorChar  + "Assets",
-                    Application.dataPath + Path.DirectorySeparatorChar + "Assets" + Path.DirectorySeparatorChar  + "Assets" + Path.DirectorySeparatorChar + "Plugins",
-                    Application.dataPath + Path.DirectorySeparatorChar + "Plugins",
-                    Application.dataPath + Path.DirectorySeparatorChar + "Assets" + Path.DirectorySeparatorChar + "Plugins",
-                    Application.dataPath.Replace("/base.apk", ""),
-                    Application.dataPath.Replace("/base.apk", "") + Path.DirectorySeparatorChar + "lib",
-                    Application.dataPath.Replace("/base.apk", "") + Path.DirectorySeparatorChar + "Assets",
-                    Application.dataPath.Replace("/base.apk", "") + Path.DirectorySeparatorChar + "Assets" + Path.DirectorySeparatorChar  + "Assets",
-                    Application.dataPath.Replace("/base.apk", "") + Path.DirectorySeparatorChar + "Assets" + Path.DirectorySeparatorChar + "Plugins",
-                    Application.dataPath.Replace("/base.apk", "") + Path.DirectorySeparatorChar + "Assets" + Path.DirectorySeparatorChar  + "Assets" + Path.DirectorySeparatorChar + "Plugins",
-                    Application.dataPath.Replace("/base.apk", "") + Path.DirectorySeparatorChar + "Plugins",
-                };
-                foreach(string path in dict) {
-                    Environment.SetEnvironmentVariable("PATH", currentPath + Path.PathSeparator + path, EnvironmentVariableTarget.Process);
-                    currentPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process);
-                }
                 Debug.Log("env " + Environment.GetEnvironmentVariable("PATH"));
             #elif UNITY_EDITOR
                 Environment.SetEnvironmentVariable("PATH", currentPath + Path.PathSeparator + dllPath, EnvironmentVariableTarget.Process);

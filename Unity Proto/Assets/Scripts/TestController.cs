@@ -13,7 +13,6 @@ public class TestController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
     }
 
     // Update is called once per frame
@@ -57,13 +56,17 @@ public class TestController : MonoBehaviour
 
             int bufferSize = w * h * 4;
 
-            if (testPtr != IntPtr.Zero)
+            if (bufferSize > 0)
             {
                 byte[] rawData = new byte[bufferSize];
-                Marshal.Copy(testPtr, rawData, 0, bufferSize);
+                Marshal.Copy(pixelPtr, rawData, 0, bufferSize);
 
                 resultTexture.LoadRawTextureData(rawData);
                 resultTexture.Apply();
+                
+                // Marshal.FreeHGlobal(testPtr);
+                testPtr = IntPtr.Zero;
+                GC.SuppressFinalize(this);
             }
 
             // NativeAdapter._FreeBuffer();

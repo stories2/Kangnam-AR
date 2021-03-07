@@ -106,19 +106,19 @@ extern "C" {
         Mat smallImg;
         resize(img, smallImg, Size(int(img.size().width * ratio), maxImgWidth));
 
-    //        imshow("smallImg", smallImg);
+//        imshow("smallImg", smallImg);
 
         Mat gray;
         cvtColor(smallImg, gray, COLOR_BGR2GRAY);
-    //        imshow("gray", gray);
+//        imshow("gray", gray);
 
         Mat grayBlur;
         GaussianBlur(gray, grayBlur, Size(3, 3), BORDER_CONSTANT);
-    //        imshow("grayBlur", grayBlur);
+//        imshow("grayBlur", grayBlur);
 
         Mat edge;
         Canny(grayBlur, edge, 100, 200);
-    //        imshow("edge", edge);
+//        imshow("edge", edge);
 
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
@@ -139,10 +139,12 @@ extern "C" {
                 screenContours = approx;
                 break;
             }
+
+            vector<Point>().swap(approx);
         }
 
         if (screenContours.size() <= 0) {
-            FreeBuffer();
+//        FreeBuffer();
             picRows = 0;
             picCols = 0;
 
@@ -166,6 +168,7 @@ extern "C" {
             gray.release();
             smallImg.release();
             img.release();
+
             return 0;
         }
 
@@ -173,7 +176,7 @@ extern "C" {
         screenContours_vec.push_back(screenContours);
 
         drawContours(smallImg_copy, screenContours_vec, -1, CV_RGB(0, 255, 0), 2);
-    //        imshow("contours", smallImg_copy);
+//        imshow("contours", smallImg_copy);
 
         Point topLeft, topRight, bottomRight, bottomLeft;
         topLeft.x = 0x0fffffff;
@@ -229,17 +232,17 @@ extern "C" {
         Mat perspectMat = getPerspectiveTransform(srcRect, destRect);
         Mat warpedImg;
         warpPerspective(smallImg, warpedImg, perspectMat, Size(maxWidth, maxHeight));
-    //        imshow("warpedImg", warpedImg);
+//        imshow("warpedImg", warpedImg);
 
         Mat warpedImgGray;
         cvtColor(warpedImg, warpedImgGray, COLOR_BGR2GRAY);
         adaptiveThreshold(warpedImgGray, warpedImgGray, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 21, 10);
-    //        imshow("adapted", warpedImgGray);
+//        imshow("adapted", warpedImgGray);
 
         Mat edgePic;
         GaussianBlur(warpedImgGray, edgePic, Size(11, 11), BORDER_CONSTANT);
         Canny(edgePic, edgePic, 100, 200);
-    //        imshow("edgePic", edgePic);
+//        imshow("edgePic", edgePic);
 
         vector<vector<Point>> contoursPic;
         vector<Vec4i> hierarchyPic;
@@ -247,7 +250,7 @@ extern "C" {
 
         Mat edgePic_copy = warpedImg.clone();
         drawContours(edgePic_copy, contoursPic, -1, CV_RGB(0, 255, 0), 2);
-    //        imshow("edgePic_copy", edgePic_copy);
+//        imshow("edgePic_copy", edgePic_copy);
 
         Mat onlyContours = Mat(Size(edgePic_copy.cols, edgePic_copy.rows), CV_8UC4, 0.0);
         drawContours(onlyContours, contoursPic, -1, (255, 255, 255, 255), 2);
@@ -261,12 +264,12 @@ extern "C" {
 //        imshow("onlyContours", onlyContours);
         int lastPicRows = picRows, lastPicCols = picCols;
         if (onlyContours.rows > 0 && onlyContours.rows != lastPicRows && onlyContours.cols > 0 && onlyContours.cols != lastPicCols) {
-            FreeBuffer();
+//        FreeBuffer();
             picRows = onlyContours.rows;
             picCols = onlyContours.cols;
-            resultPicBuffer = new unsigned char[picRows * picCols * 4];
+//        resultPicBuffer = new unsigned char[picRows * picCols * 4];
         } else if (onlyContours.rows <= 0 || onlyContours.cols <= 0) {
-            FreeBuffer();
+//        FreeBuffer();
             picRows = 0;
             picCols = 0;
 
@@ -312,12 +315,14 @@ extern "C" {
             gray.release();
             smallImg.release();
             img.release();
+
             return 0;
         }
 //    picRows = onlyContours.rows;
 //    picCols = onlyContours.cols;
 //    resultPicBuffer = new unsigned char[picRows * picCols * 4];
-        fill_n(resultPicBuffer, picRows * picCols * 4, 0);
+        fill_n(buffer, picRows * picCols * 4, 0);
+//    fill_n(resultPicBuffer, picRows * picCols * 4, 0);
 
 //    globalMat = onlyContours.clone();
 
@@ -326,7 +331,8 @@ extern "C" {
 //    size_t size = picRows * picCols * 3;
 //    memcpy(resultPicBuffer, onlyContours.data, size);
 //    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
-        memcpy(resultPicBuffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
+        memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
+//    memcpy(resultPicBuffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
 
         for (int i = 0; i < contours.size(); i++) {
             vector<Point>().swap(contours[i]);

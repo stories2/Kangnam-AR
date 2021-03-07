@@ -144,7 +144,7 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
     }
 
     if (screenContours.size() <= 0) {
-        FreeBuffer();
+//        FreeBuffer();
         picRows = 0;
         picCols = 0;
         
@@ -264,12 +264,12 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 //        imshow("onlyContours", onlyContours);
     int lastPicRows = picRows, lastPicCols = picCols;
     if (onlyContours.rows > 0 && onlyContours.rows != lastPicRows && onlyContours.cols > 0 && onlyContours.cols != lastPicCols) {
-        FreeBuffer();
+//        FreeBuffer();
         picRows = onlyContours.rows;
         picCols = onlyContours.cols;
-        resultPicBuffer = new unsigned char[picRows * picCols * 4];
+//        resultPicBuffer = new unsigned char[picRows * picCols * 4];
     } else if (onlyContours.rows <= 0 || onlyContours.cols <= 0) {
-        FreeBuffer();
+//        FreeBuffer();
         picRows = 0;
         picCols = 0;
         
@@ -321,7 +321,8 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 //    picRows = onlyContours.rows;
 //    picCols = onlyContours.cols;
 //    resultPicBuffer = new unsigned char[picRows * picCols * 4];
-    fill_n(resultPicBuffer, picRows * picCols * 4, 0);
+    fill_n(buffer, picRows * picCols * 4, 0);
+//    fill_n(resultPicBuffer, picRows * picCols * 4, 0);
     
 //    globalMat = onlyContours.clone();
     
@@ -330,7 +331,8 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 //    size_t size = picRows * picCols * 3;
 //    memcpy(resultPicBuffer, onlyContours.data, size);
 //    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
-    memcpy(resultPicBuffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
+    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
+//    memcpy(resultPicBuffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
     
     for (int i = 0; i < contours.size(); i++) {
         vector<Point>().swap(contours[i]);

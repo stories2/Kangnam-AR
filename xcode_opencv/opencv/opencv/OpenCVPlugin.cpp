@@ -1,28 +1,20 @@
-//
-//  OpenCVPlugin.cpp
-//  opencv
-//
-//  Created by 김현우 on 2021/03/06.
-//
 
 #include "OpenCVPlugin.hpp"
-#include <iostream>
-//https://www.vbflash.net/83
-#include <opencv2/opencv.hpp>
 
-using namespace std;
-using namespace cv;
-
-uint8_t  *resultPicBuffer;
 int picRows = 0;
 int picCols = 0;
 
-extern "C" {
-    int FooTestFunction_Internal();
-    int ResultPicBufferRows();
-    int ResultPicBufferCols();
-    bool compareContourAreas (std::vector<cv::Point>, std::vector<cv::Point>);
-    uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer);
+void FlipImage(Color32 **rawImage, int width, int height)
+{
+    Mat image(height, width, CV_8UC4, *rawImage);
+    flip(image, image, -1);
+    cvtColor(image, image, COLOR_BGRA2GRAY);
+    
+    image.release();
+}
+
+int FooTestFunction_Internal() {
+    return 12345;
 }
 
 int ResultPicBufferRows() {
@@ -33,39 +25,57 @@ int ResultPicBufferCols() {
     return picCols;
 }
 
-bool compareContourAreas (std::vector<cv::Point>, std::vector<cv::Point>);
+unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 
-uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer) {
+    Mat temp(height, width, CV_8UC3, buffer);
+//    imshow("temp", temp);
+    
+    Mat img(height, width, CV_8UC4);
+    cvtColor(temp, img, COLOR_BGR2BGRA);
+    temp.release();
+//    imshow("temp", img);
+    // fast release
 
-    Mat img(height, width, CV_8UC4, buffer);
+    int maxImgWidth = 2000;
+    float ratio = float(maxImgWidth) / img.size().height;
 
-    float maxImgWidth = 2000.0;
-    float ratio = maxImgWidth / img.size().height;
-
-    Mat smallImg;
-    resize(img, smallImg, Size(int(img.size().width * ratio), maxImgWidth));
+    Mat smallImg = Mat(int(img.size().width * ratio), maxImgWidth, CV_8UC4);
+    // fast release
+    resize(img, smallImg, Size(smallImg.size().height, smallImg.size().width));
+//    imshow("smallImg", smallImg);
+    
+    img.release();
 
 //        imshow("smallImg", smallImg);
 
     Mat gray;
+    // fast release
     cvtColor(smallImg, gray, COLOR_BGR2GRAY);
 //        imshow("gray", gray);
 
     Mat grayBlur;
+    // fast release
     GaussianBlur(gray, grayBlur, Size(3, 3), BORDER_CONSTANT);
 //        imshow("grayBlur", grayBlur);
+    gray.release();
 
     Mat edge;
+    // fast release
     Canny(grayBlur, edge, 100, 200);
 //        imshow("edge", edge);
+    grayBlur.release();
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     findContours( edge, contours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE );
+    
+    edge.release();
+    
     sort(contours.begin(), contours.end(), compareContourAreas);
 
     vector<vector<Point>> topContours = vector<vector<Point>>(contours.end() - 5, contours.end());
     Mat smallImg_copy = smallImg.clone();
+    // fast release
 
     vector<Point> screenContours;
 
@@ -78,11 +88,18 @@ uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer) {
             screenContours = approx;
             break;
         }
+        
+        vector<Point>().swap(approx);
     }
 
     if (screenContours.size() <= 0) {
+//        FreeBuffer();
         picRows = 0;
         picCols = 0;
+        
+        smallImg_copy.release();
+        smallImg.release();
+        
         return 0;
     }
 
@@ -91,6 +108,7 @@ uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer) {
 
     drawContours(smallImg_copy, screenContours_vec, -1, CV_RGB(0, 255, 0), 2);
 //        imshow("contours", smallImg_copy);
+    smallImg_copy.release();
 
     Point topLeft, topRight, bottomRight, bottomLeft;
     topLeft.x = 0x0fffffff;
@@ -144,52 +162,84 @@ uint8_t *ExportPicFromDoc(int width, int height, uint8_t *buffer) {
     destRect.push_back(Point(maxWidth, maxHeight));
 
     Mat perspectMat = getPerspectiveTransform(srcRect, destRect);
+    // fast release
     Mat warpedImg;
+    // fast release
     warpPerspective(smallImg, warpedImg, perspectMat, Size(maxWidth, maxHeight));
 //        imshow("warpedImg", warpedImg);
+    perspectMat.release();
+    smallImg.release();
 
     Mat warpedImgGray;
+    // fast release
     cvtColor(warpedImg, warpedImgGray, COLOR_BGR2GRAY);
     adaptiveThreshold(warpedImgGray, warpedImgGray, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 21, 10);
 //        imshow("adapted", warpedImgGray);
 
     Mat edgePic;
+    // fast release
     GaussianBlur(warpedImgGray, edgePic, Size(11, 11), BORDER_CONSTANT);
+    warpedImgGray.release();
     Canny(edgePic, edgePic, 100, 200);
 //        imshow("edgePic", edgePic);
 
     vector<vector<Point>> contoursPic;
     vector<Vec4i> hierarchyPic;
     findContours( edgePic, contoursPic, hierarchyPic, RETR_LIST, CHAIN_APPROX_SIMPLE );
+    edgePic.release();
 
     Mat edgePic_copy = warpedImg.clone();
+    // fast release
+    warpedImg.release();
     drawContours(edgePic_copy, contoursPic, -1, CV_RGB(0, 255, 0), 2);
 //        imshow("edgePic_copy", edgePic_copy);
 
-    Mat onlyContours = Mat(Size(edgePic_copy.cols, edgePic_copy.rows), CV_8UC3);
-    drawContours(onlyContours, contoursPic, -1, CV_RGB(255, 255, 255), 2);
-    cvtColor(onlyContours, onlyContours, COLOR_BGR2GRAY);
+    Mat onlyContours = Mat(Size(edgePic_copy.cols, edgePic_copy.rows), CV_8UC4, 0.0);
+    edgePic_copy.release();
+    drawContours(onlyContours, contoursPic, -1, (255, 255, 255, 255), 2);
+    
+//    cv::cvtColor(onlyContours, onlyContours, COLOR_RGB2BGRA);
+//    std::vector<cv::Mat> bgra;
+//    cv::split(onlyContours, bgra);
+//    std::swap(bgra[0], bgra[3]);
+//    std::swap(bgra[1], bgra[2]);
+//    cvtColor(onlyContours, onlyContours, COLOR_BGR2GRAY);
 //        imshow("onlyContours", onlyContours);
+    int lastPicRows = picRows, lastPicCols = picCols;
+    if (onlyContours.rows > 0 && onlyContours.rows != lastPicRows && onlyContours.cols > 0 && onlyContours.cols != lastPicCols) {
+//        FreeBuffer();
+        picRows = onlyContours.rows;
+        picCols = onlyContours.cols;
+//        resultPicBuffer = new unsigned char[picRows * picCols * 4];
+    } else if (onlyContours.rows <= 0 || onlyContours.cols <= 0) {
+//        FreeBuffer();
+        picRows = 0;
+        picCols = 0;
 
-    picRows = onlyContours.rows;
-    picCols = onlyContours.cols;
+        onlyContours.release();
+        
+        return 0;
+    }
+//    picRows = onlyContours.rows;
+//    picCols = onlyContours.cols;
+//    resultPicBuffer = new unsigned char[picRows * picCols * 4];
+    printf("buffer size %d %d", picRows * picCols * 4, onlyContours.total() * onlyContours.elemSize());
+    fill_n(buffer, picRows * picCols * 4, 0);
+//    fill_n(resultPicBuffer, picRows * picCols * 4, 0);
+    
+//    globalMat = onlyContours.clone();
+    
+//    buffer = onlyContours.data;
 
-    size_t size = picRows * picCols * 3;
-    memcpy(resultPicBuffer, onlyContours.data, size);
+//    size_t size = picRows * picCols * 3;
+//    memcpy(resultPicBuffer, onlyContours.data, size);
+//    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
+    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
+//    memcpy(resultPicBuffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
 
     onlyContours.release();
-    edgePic_copy.release();
-    edgePic.release();
-    warpedImgGray.release();
-    warpedImg.release();
-    smallImg_copy.release();
-    edge.release();
-    grayBlur.release();
-    gray.release();
-    smallImg.release();
-    img.release();
 
-    return resultPicBuffer;
+    return buffer;
 }
 
 bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 ) {

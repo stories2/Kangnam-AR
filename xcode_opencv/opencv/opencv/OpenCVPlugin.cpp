@@ -26,6 +26,12 @@ int ResultPicBufferCols() {
 }
 
 unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
+    
+    if (buffer == NULL) {
+        picRows = 0;
+        picCols = 0;
+        return 0;
+    }
 
     Mat temp(height, width, CV_8UC3, buffer);
 //    imshow("temp", temp);

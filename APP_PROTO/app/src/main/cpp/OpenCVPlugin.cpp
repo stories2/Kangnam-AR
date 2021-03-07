@@ -98,6 +98,12 @@ extern "C" {
 
     unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 
+        if (buffer == NULL) {
+            picRows = 0;
+            picCols = 0;
+            return 0;
+        }
+
         Mat img(height, width, CV_8UC4, buffer);
         // fast release
 

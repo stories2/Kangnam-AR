@@ -99,34 +99,47 @@ bool compareContourAreas (std::vector<cv::Point>, std::vector<cv::Point>);
 unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 
     Mat img(height, width, CV_8UC4, buffer);
+    // fast release
 
-    float maxImgWidth = 2000.0;
-    float ratio = maxImgWidth / img.size().height;
+    int maxImgWidth = 2000;
+    float ratio = float(maxImgWidth) / img.size().height;
 
-    Mat smallImg;
-    resize(img, smallImg, Size(int(img.size().width * ratio), maxImgWidth));
+    Mat smallImg = Mat(int(img.size().width * ratio), maxImgWidth, CV_8UC4);
+    // fast release
+    resize(img, smallImg, Size(smallImg.size().height, smallImg.size().width));
+    
+    img.release();
 
 //        imshow("smallImg", smallImg);
 
     Mat gray;
+    // fast release
     cvtColor(smallImg, gray, COLOR_BGR2GRAY);
 //        imshow("gray", gray);
 
     Mat grayBlur;
+    // fast release
     GaussianBlur(gray, grayBlur, Size(3, 3), BORDER_CONSTANT);
 //        imshow("grayBlur", grayBlur);
+    gray.release();
 
     Mat edge;
+    // fast release
     Canny(grayBlur, edge, 100, 200);
 //        imshow("edge", edge);
+    grayBlur.release();
 
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     findContours( edge, contours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE );
+    
+    edge.release();
+    
     sort(contours.begin(), contours.end(), compareContourAreas);
 
     vector<vector<Point>> topContours = vector<vector<Point>>(contours.end() - 5, contours.end());
     Mat smallImg_copy = smallImg.clone();
+    // fast release
 
     vector<Point> screenContours;
 
@@ -148,26 +161,8 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
         picRows = 0;
         picCols = 0;
         
-        for (int i = 0; i < contours.size(); i++) {
-            vector<Point>().swap(contours[i]);
-        }
-        vector<vector<Point>>().swap(contours);
-        
-        vector<Vec4i>().swap(hierarchy);
-        
-        for (int i = 0; i < topContours.size(); i++) {
-            vector<Point>().swap(topContours[i]);
-        }
-        vector<vector<Point>>().swap(topContours);
-        
-        vector<Point>().swap(screenContours);
-        
         smallImg_copy.release();
-        edge.release();
-        grayBlur.release();
-        gray.release();
         smallImg.release();
-        img.release();
         
         return 0;
     }
@@ -177,6 +172,7 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 
     drawContours(smallImg_copy, screenContours_vec, -1, CV_RGB(0, 255, 0), 2);
 //        imshow("contours", smallImg_copy);
+    smallImg_copy.release();
 
     Point topLeft, topRight, bottomRight, bottomLeft;
     topLeft.x = 0x0fffffff;
@@ -230,29 +226,40 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
     destRect.push_back(Point(maxWidth, maxHeight));
 
     Mat perspectMat = getPerspectiveTransform(srcRect, destRect);
+    // fast release
     Mat warpedImg;
+    // fast release
     warpPerspective(smallImg, warpedImg, perspectMat, Size(maxWidth, maxHeight));
 //        imshow("warpedImg", warpedImg);
+    perspectMat.release();
+    smallImg.release();
 
     Mat warpedImgGray;
+    // fast release
     cvtColor(warpedImg, warpedImgGray, COLOR_BGR2GRAY);
     adaptiveThreshold(warpedImgGray, warpedImgGray, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 21, 10);
 //        imshow("adapted", warpedImgGray);
 
     Mat edgePic;
+    // fast release
     GaussianBlur(warpedImgGray, edgePic, Size(11, 11), BORDER_CONSTANT);
+    warpedImgGray.release();
     Canny(edgePic, edgePic, 100, 200);
 //        imshow("edgePic", edgePic);
 
     vector<vector<Point>> contoursPic;
     vector<Vec4i> hierarchyPic;
     findContours( edgePic, contoursPic, hierarchyPic, RETR_LIST, CHAIN_APPROX_SIMPLE );
+    edgePic.release();
 
     Mat edgePic_copy = warpedImg.clone();
+    // fast release
+    warpedImg.release();
     drawContours(edgePic_copy, contoursPic, -1, CV_RGB(0, 255, 0), 2);
 //        imshow("edgePic_copy", edgePic_copy);
 
     Mat onlyContours = Mat(Size(edgePic_copy.cols, edgePic_copy.rows), CV_8UC4, 0.0);
+    edgePic_copy.release();
     drawContours(onlyContours, contoursPic, -1, (255, 255, 255, 255), 2);
     
 //    cv::cvtColor(onlyContours, onlyContours, COLOR_RGB2BGRA);
@@ -272,49 +279,8 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 //        FreeBuffer();
         picRows = 0;
         picCols = 0;
-        
-        for (int i = 0; i < contours.size(); i++) {
-            vector<Point>().swap(contours[i]);
-        }
-        vector<vector<Point>>().swap(contours);
-        
-        vector<Vec4i>().swap(hierarchy);
-        
-        for (int i = 0; i < topContours.size(); i++) {
-            vector<Point>().swap(topContours[i]);
-        }
-        vector<vector<Point>>().swap(topContours);
-        
-        vector<Point>().swap(screenContours);
-        
-        for (int i = 0; i < screenContours_vec.size(); i++) {
-            vector<Point>().swap(screenContours_vec[i]);
-        }
-        vector<vector<Point>>().swap(screenContours_vec);
-        
-        vector<Point2f>().swap(srcRect);
-        
-        vector<Point2f>().swap(destRect);
-        
-        for (int i = 0; i < contoursPic.size(); i++) {
-            vector<Point>().swap(contoursPic[i]);
-        }
-        vector<vector<Point>>().swap(contoursPic);
-        
-        vector<Vec4i>().swap(hierarchyPic);
 
         onlyContours.release();
-        edgePic_copy.release();
-        edgePic.release();
-        warpedImgGray.release();
-        warpedImg.release();
-        perspectMat.release();
-        smallImg_copy.release();
-        edge.release();
-        grayBlur.release();
-        gray.release();
-        smallImg.release();
-        img.release();
         
         return 0;
     }
@@ -333,51 +299,10 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 //    memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
     memcpy(buffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
 //    memcpy(resultPicBuffer, onlyContours.data, onlyContours.total() * onlyContours.elemSize());
-    
-    for (int i = 0; i < contours.size(); i++) {
-        vector<Point>().swap(contours[i]);
-    }
-    vector<vector<Point>>().swap(contours);
-    
-    vector<Vec4i>().swap(hierarchy);
-    
-    for (int i = 0; i < topContours.size(); i++) {
-        vector<Point>().swap(topContours[i]);
-    }
-    vector<vector<Point>>().swap(topContours);
-    
-    vector<Point>().swap(screenContours);
-    
-    for (int i = 0; i < screenContours_vec.size(); i++) {
-        vector<Point>().swap(screenContours_vec[i]);
-    }
-    vector<vector<Point>>().swap(screenContours_vec);
-    
-    vector<Point2f>().swap(srcRect);
-    
-    vector<Point2f>().swap(destRect);
-    
-    for (int i = 0; i < contoursPic.size(); i++) {
-        vector<Point>().swap(contoursPic[i]);
-    }
-    vector<vector<Point>>().swap(contoursPic);
-    
-    vector<Vec4i>().swap(hierarchyPic);
 
     onlyContours.release();
-    edgePic_copy.release();
-    edgePic.release();
-    warpedImgGray.release();
-    warpedImg.release();
-    perspectMat.release();
-    smallImg_copy.release();
-    edge.release();
-    grayBlur.release();
-    gray.release();
-    smallImg.release();
-    img.release();
 
-    return resultPicBuffer;
+    return buffer;
 }
 
 bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 ) {

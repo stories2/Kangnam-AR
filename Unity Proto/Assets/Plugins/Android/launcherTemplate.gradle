@@ -30,8 +30,8 @@ dependencies {
     }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '28.0.3'
+    compileSdkVersion **APIVERSION**
+    buildToolsVersion '**BUILDTOOLS**'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -39,20 +39,20 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 26
-        targetSdkVersion 29
-        applicationId 'com.example.unityproto'
+        minSdkVersion **MINSDKVERSION**
+        targetSdkVersion **TARGETSDKVERSION**
+        applicationId '**APPLICATIONID**'
         ndk {
-            abiFilters 'armeabi-v7a'
+            abiFilters **ABIFILTERS**
         }
-        versionCode 1
-        versionName '0.1'
+        versionCode **VERSIONCODE**
+        versionName '**VERSIONNAME**'
     }
 
     aaptOptions {
-        noCompress = ['.unity3d', '.ress', '.resource', '.obb']
+        noCompress = ['.unity3d', '.ress', '.resource', '.obb'**STREAMING_ASSETS**]
         ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~"
-    }
+    }**SIGN**
 
     lintOptions {
         abortOnError false
@@ -60,24 +60,18 @@ android {
 
     buildTypes {
         debug {
-            minifyEnabled false
-            useProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt')
-            signingConfig signingConfigs.debug
+            minifyEnabled **MINIFY_DEBUG**
+            useProguard **PROGUARD_DEBUG**
+            proguardFiles getDefaultProguardFile('proguard-android.txt')**SIGNCONFIG**
             jniDebuggable true
         }
         release {
-            minifyEnabled false
-            useProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt')
-            signingConfig signingConfigs.debug
+            minifyEnabled **MINIFY_RELEASE**
+            useProguard **PROGUARD_RELEASE**
+            proguardFiles getDefaultProguardFile('proguard-android.txt')**SIGNCONFIG**
         }
-    }
-
-    packagingOptions {
-        doNotStrip '*/armeabi-v7a/*.so'
-    }
-
+    }**PACKAGING_OPTIONS****SPLITS**
+**BUILT_APK_LOCATION**
     bundle {
         language {
             enableSplit = false
@@ -89,4 +83,4 @@ android {
             enableSplit = true
         }
     }
-}
+}**SPLITS_VERSION_CODE****LAUNCHER_SOURCE_BUILD_SETUP**

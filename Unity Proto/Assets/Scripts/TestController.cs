@@ -72,6 +72,7 @@ public class TestController : MonoBehaviour
             // NativeAdapter._FreeBuffer();
 
             OutImage.texture = resultTexture;
+            OutImage.GetComponent<RectTransform>().sizeDelta = new Vector2(resultTexture.width, resultTexture.height);
 
         } catch (System.Exception e) {
             txt.text = e.Message;

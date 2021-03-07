@@ -799,6 +799,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arCam: {fileID: 1874590351}
+  arCamManager: {fileID: 1874590352}
+  InImage: {fileID: 2014855509}
+  OutImage: {fileID: 361240466}
+  txt: {fileID: 485137259}
 --- !u!1 &2014855507
 GameObject:
   m_ObjectHideFlags: 0

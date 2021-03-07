@@ -12,7 +12,7 @@ int main(int argc, const char * argv[]) {
     std::cout << "Hello, World!\n";
     cout << "Open CV Version" << CV_VERSION << endl;
     
-    Mat img = imread("/Users/stories2/Documents/GitHub/Kangnam-AR/IMG_3992.png", IMREAD_COLOR);
+    Mat img = imread("/Users/stories2/Documents/GitHub/Kangnam-AR/IMG_3993.png", IMREAD_COLOR);
     imshow("img origin", img);
     unsigned char* ptr = ExportPicFromDoc(img.size().width, img.size().height, img.data);
     img.release();

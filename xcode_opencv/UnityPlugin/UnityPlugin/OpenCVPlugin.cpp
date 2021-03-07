@@ -135,6 +135,15 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
     
     edge.release();
     
+    if (contours.size() <= 0) {
+        picRows = 0;
+        picCols = 0;
+        
+        smallImg.release();
+        
+        return 0;
+    }
+    
     sort(contours.begin(), contours.end(), compareContourAreas);
     
     int limit = contours.size();
@@ -302,7 +311,7 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 //    picRows = onlyContours.rows;
 //    picCols = onlyContours.cols;
 //    resultPicBuffer = new unsigned char[picRows * picCols * 4];
-    fill_n(buffer, picRows * picCols * 4, 0);
+//    fill_n(buffer, picRows * picCols * 4, 0);
 //    fill_n(resultPicBuffer, picRows * picCols * 4, 0);
     
 //    globalMat = onlyContours.clone();

@@ -71,6 +71,15 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
     
     edge.release();
     
+    if (contours.size() <= 0) {
+        picRows = 0;
+        picCols = 0;
+        
+        smallImg.release();
+        
+        return 0;
+    }
+    
     sort(contours.begin(), contours.end(), compareContourAreas);
     
     int limit = contours.size();
@@ -239,7 +248,7 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 //    picCols = onlyContours.cols;
 //    resultPicBuffer = new unsigned char[picRows * picCols * 4];
     printf("buffer size %d %d", picRows * picCols * 4, onlyContours.total() * onlyContours.elemSize());
-    fill_n(buffer, picRows * picCols * 4, 0);
+//    fill_n(buffer, picRows * picCols * 4, 0);
 //    fill_n(resultPicBuffer, picRows * picCols * 4, 0);
     
 //    globalMat = onlyContours.clone();

@@ -36,7 +36,7 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 //    imshow("temp", img);
     // fast release
 
-    int maxImgWidth = 2000;
+    int maxImgWidth = 1000;
     float ratio = float(maxImgWidth) / img.size().height;
 
     Mat smallImg = Mat(int(img.size().width * ratio), maxImgWidth, CV_8UC4);
@@ -72,8 +72,23 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
     edge.release();
     
     sort(contours.begin(), contours.end(), compareContourAreas);
+    
+    int limit = contours.size();
+    if (contours.size() >= 5) {
+        limit = 5;
+    }
 
-    vector<vector<Point>> topContours = vector<vector<Point>>(contours.end() - 5, contours.end());
+    vector<vector<Point>> topContours = vector<vector<Point>>(contours.end() - limit, contours.end());
+    if (topContours.size() <= 0) {
+        //        FreeBuffer();
+        picRows = 0;
+        picCols = 0;
+        
+        smallImg.release();
+        
+        return 0;
+    }
+    
     Mat smallImg_copy = smallImg.clone();
     // fast release
 

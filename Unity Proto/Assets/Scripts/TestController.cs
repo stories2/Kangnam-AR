@@ -53,6 +53,7 @@ public class TestController : MonoBehaviour
             // NativeAdapter._ReturnGlobalMat(resultPixelPtr);
             // resultTexture.SetPixels32(resultPixels);
             // resultTexture.Apply();
+            Resources.UnloadUnusedAssets();
 
             int bufferSize = w * h * 4;
 
@@ -65,8 +66,7 @@ public class TestController : MonoBehaviour
                 resultTexture.Apply();
                 
                 // Marshal.FreeHGlobal(testPtr);
-                testPtr = IntPtr.Zero;
-                GC.SuppressFinalize(this);
+                // testPtr = IntPtr.Zero;
             }
 
             // NativeAdapter._FreeBuffer();
@@ -82,6 +82,7 @@ public class TestController : MonoBehaviour
                 pixelHandle.Free();
             }
             GC.Collect();
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -23,6 +23,7 @@ public class ARTestController : MonoBehaviour
     void Start()
     {
         arCamManager.frameReceived += OnFrameReceived;
+        OutImage.enabled = false;
     }
 
     // Update is called once per frame
@@ -122,9 +123,15 @@ public class ARTestController : MonoBehaviour
                         Texture2D resultTexture2D = ExportPicFromFrame(this.texture2d);
                         if (resultTexture2D != null) {
                             OutImage.texture = resultTexture2D;
+                            OutImage.GetComponent<RectTransform>().sizeDelta = new Vector2(resultTexture2D.width, resultTexture2D.height);
+                            OutImage.enabled = true;
                             txt.text = "Pic detected.";
+                        } else {
+                            if (OutImage.texture == null) {
+                                OutImage.enabled = false;
+                            }
+                            txt.text = "Finding pic...";
                         }
-                        // OutImage.GetComponent<RectTransform>().sizeDelta = new Vector2(resultTexture.width, resultTexture.height);
                     }
                 } catch (System.Exception e) {
                     txt.text = e.Message;
@@ -200,6 +207,8 @@ public class ARTestController : MonoBehaviour
 
                 resultTexture.LoadRawTextureData(rawData);
                 resultTexture.Apply();
+            } else {
+                return null;
             }
         } catch (System.Exception e) {
             txt.text = e.Message;

@@ -94,7 +94,7 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 
     vector<Point> screenContours;
 
-    for (unsigned long i = topContours.size() - 1; i >= 0; i--) {
+    for (long i = topContours.size() - 1; i >= 0; i--) {
         double peri = arcLength(topContours[i], true);
         vector<Point> approx;
         approxPolyDP(topContours[i], approx, 0.02 * peri, true);

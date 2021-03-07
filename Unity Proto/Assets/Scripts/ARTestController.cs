@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.UI;
 using UnityEngine.XR.ARSubsystems;
-
 public class ARTestController : MonoBehaviour
 {
     public ARCameraBackground arCam;
@@ -118,6 +118,13 @@ public class ARTestController : MonoBehaviour
 
                         InImage.texture = this.texture2d;
                         txt.text = $"w: {xrCpuImage.width} h: {xrCpuImage.height} wt: {texture2d.width} ht: {texture2d.height}";
+
+                        Texture2D resultTexture2D = ExportPicFromFrame(this.texture2d);
+                        if (resultTexture2D != null) {
+                            OutImage.texture = resultTexture2D;
+                            txt.text = "Pic detected.";
+                        }
+                        // OutImage.GetComponent<RectTransform>().sizeDelta = new Vector2(resultTexture.width, resultTexture.height);
                     }
                 } catch (System.Exception e) {
                     txt.text = e.Message;
@@ -156,6 +163,56 @@ public class ARTestController : MonoBehaviour
         rotatedTexture.Apply();
         return rotatedTexture;
     }
+    
+    Texture2D ExportPicFromFrame(Texture2D rawImageTexture) {
+        GCHandle pixelHandle;
+        Texture2D resultTexture = null;
+        try {
+            Color32[] pixels = rawImageTexture.GetPixels32();
+            Debug.Log("Pixels: " + pixels.Length.ToString());
+
+            pixelHandle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
+            Debug.Log("Addr: " + pixelHandle.ToString());
+            IntPtr pixelPtr = pixelHandle.AddrOfPinnedObject();
+            Debug.Log("pixelPtr" + pixelPtr.ToString());
+            IntPtr testPtr = NativeAdapter.PicFromDoc(rawImageTexture.width, rawImageTexture.height, pixelPtr);
+            Debug.Log("pixelPtr" + pixelPtr.ToString());
+            Debug.Log("testPtr" + testPtr.ToString() + " test2: " + NativeAdapter._GetResultPicBuffer());
+
+            int nativeH = NativeAdapter.PicBufferRows();
+            int nativeW = NativeAdapter.PicBufferCols();
+            int w = rawImageTexture.width;
+            int h = rawImageTexture.height;
+            w = nativeW;
+            h = nativeH;
+
+            Debug.Log($"Result w: {w} h: {h} nativeW: {nativeW} nativeH: {nativeH}");
+
+            resultTexture = new Texture2D(w, h, TextureFormat.ARGB32, false);
+            Resources.UnloadUnusedAssets();
+
+            int bufferSize = w * h * 4;
+
+            if (bufferSize > 0)
+            {
+                byte[] rawData = new byte[bufferSize];
+                Marshal.Copy(pixelPtr, rawData, 0, bufferSize);
+
+                resultTexture.LoadRawTextureData(rawData);
+                resultTexture.Apply();
+            }
+        } catch (System.Exception e) {
+            txt.text = e.Message;
+            Debug.Log(e);
+        } finally {
+            if (pixelHandle != null) {
+                pixelHandle.Free();
+            }
+            GC.Collect();
+            GC.SuppressFinalize(this);
+        }
+        return resultTexture;
+    } 
 
     public static Texture2D GetRTPixels(RenderTexture rt) {
 

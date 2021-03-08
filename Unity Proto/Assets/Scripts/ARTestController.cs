@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -19,11 +20,14 @@ public class ARTestController : MonoBehaviour
     Texture2D texture2d;
     RenderTexture renderTexture;
     XRCpuImage xrCpuImage;
+
+    string externalDir;
     // Start is called before the first frame update
     void Start()
     {
         arCamManager.frameReceived += OnFrameReceived;
         OutImage.enabled = false;
+        // externalDir = GetAndroidContextExternalFilesDir();
     }
 
     // Update is called once per frame
@@ -68,6 +72,11 @@ public class ARTestController : MonoBehaviour
             {
                 try {
                     unsafe {
+                        if (texture2d != null) {
+                            Debug.Log("[OnFrameReceived] Still texture2d processing.");
+                            return;
+                        }
+                        
                         if (xrCpuImage == null) {
                             throw new System.Exception("xrCpuImage is null.");
                         }
@@ -89,20 +98,20 @@ public class ARTestController : MonoBehaviour
 
                         // See how many bytes you need to store the final image.
                         int size = xrCpuImage.GetConvertedDataSize(conversionParams);
-                        Debug.Log($"Expect frame buffer size: {size}");
+                        Debug.Log($"[OnFrameReceived] Expect frame buffer size: {size}");
 
                         // Allocate a buffer to store the image.
                         var buffer = new NativeArray<byte>(size, Allocator.Temp);
 
                         if (buffer == null) {
-                            Debug.Log($"Frame buffer failed to allocate memory.");
+                            Debug.Log($"[OnFrameReceived] Frame buffer failed to allocate memory.");
                             return;
                         }
 
-                        Debug.Log($"Frame buffer allocate size: {buffer.Length}");
+                        Debug.Log($"[OnFrameReceived] Frame buffer allocate size: {buffer.Length}");
                         // Extract the image data
                         xrCpuImage.Convert(conversionParams, new IntPtr(buffer.GetUnsafePtr()), buffer.Length);
-                        Debug.Log($"Extract the image data to buffer");
+                        Debug.Log($"[OnFrameReceived] Extract the image data to buffer");
                         // The image was converted to RGBA32 format and written into the provided buffer
                         // so you can dispose of the XRCpuImage. You must do this or it will leak resources.
 
@@ -118,50 +127,61 @@ public class ARTestController : MonoBehaviour
 
                         texture2d.LoadRawTextureData(buffer);
                         texture2d.Apply();
-                        Debug.Log($"Frame texture data loaded from buffer");
+                        Debug.Log($"[OnFrameReceived] Frame texture data loaded from buffer");
 
-                        Debug.Log($"Frame texture {texture2d.width} X {texture2d.height}");
+                        Debug.Log($"[OnFrameReceived] Frame texture {texture2d.width} X {texture2d.height}");
 
                         texture2d = rotateTexture(texture2d, false);
-                        Debug.Log($"Frame texture rotated.");
-
-                        // Done with your temporary data, so you can dispose it.
-                        buffer.Dispose();
-                        Debug.Log($"Frame buffer disposed.");
+                        Debug.Log($"[OnFrameReceived] Frame texture rotated.");
 
                         InImage.texture = this.texture2d;
                         txt.text = $"w: {xrCpuImage.width} h: {xrCpuImage.height} wt: {texture2d.width} ht: {texture2d.height}";
 
+                        #if UNITY_ANDROID
+                            string fullDestination = Path.Combine (Application.persistentDataPath, "TEST.png");
+                            Debug.Log($"[OnFrameReceived] fullDestination = {fullDestination}");
+                            byte[] itemBGBytes = texture2d.EncodeToPNG();
+                            File.WriteAllBytes(fullDestination, itemBGBytes);
+                            Debug.Log($"[OnFrameReceived] Saved at fullDestination = {fullDestination}");
+                        #endif
+
                         Texture2D resultTexture2D = ExportPicFromFrame(this.texture2d);
                         if (resultTexture2D != null) {
-                            Debug.Log($"Doc texture {resultTexture2D.width} X {resultTexture2D.height}");
+                            Debug.Log($"[OnFrameReceived] Doc texture {resultTexture2D.width} X {resultTexture2D.height}");
                             OutImage.texture = resultTexture2D;
                             OutImage.GetComponent<RectTransform>().sizeDelta = new Vector2(resultTexture2D.width, resultTexture2D.height);
                             OutImage.enabled = true;
                             txt.text = "Pic detected.";
                         } else {
-                            Debug.Log($"Finding pic...");
+                            Debug.Log($"[OnFrameReceived] Finding pic...");
                             if (OutImage.texture == null) {
                                 OutImage.enabled = false;
                             }
                             txt.text = "Finding pic...";
                         }
+
+                        // Done with your temporary data, so you can dispose it.
+                        buffer.Dispose();
+                        Debug.Log($"[OnFrameReceived] Frame buffer disposed.");
                     }
                 } catch (System.Exception e) {
+                    Debug.Log($"[OnFrameReceived] Error {e.Message}");
                     txt.text = e.Message;
                 } finally {
                     Resources.UnloadUnusedAssets();
+                    texture2d = null;
                 }
             }
         }
         else
         {
-            Debug.Log($"{Time.realtimeSinceStartup} Could not acquire cpu image.");
+            Debug.Log($"[OnFrameReceived] {Time.realtimeSinceStartup} Could not acquire cpu image.");
         }
     }
 
     Texture2D rotateTexture(Texture2D originalTexture, bool clockwise)
     {
+        Debug.Log($"[rotateTexture] Texture rotating, is null? {originalTexture == null}");
         Color32[] original = originalTexture.GetPixels32();
         Color32[] rotated = new Color32[original.Length];
         int w = originalTexture.width;
@@ -182,6 +202,8 @@ public class ARTestController : MonoBehaviour
         Texture2D rotatedTexture = new Texture2D(h, w);
         rotatedTexture.SetPixels32(rotated);
         rotatedTexture.Apply();
+        Resources.UnloadUnusedAssets();
+        Debug.Log($"[rotateTexture] Texture rotate done, is null? {rotatedTexture == null}");
         return rotatedTexture;
     }
     
@@ -190,15 +212,14 @@ public class ARTestController : MonoBehaviour
         Texture2D resultTexture = null;
         try {
             Color32[] pixels = rawImageTexture.GetPixels32();
-            Debug.Log("Pixels: " + pixels.Length.ToString());
+            Debug.Log("[ExportPicFromFrame] Pixels: " + pixels.Length.ToString());
 
             pixelHandle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
-            Debug.Log("Addr: " + pixelHandle.ToString());
+            Debug.Log("[ExportPicFromFrame] Addr: " + pixelHandle.ToString());
             IntPtr pixelPtr = pixelHandle.AddrOfPinnedObject();
-            Debug.Log("pixelPtr" + pixelPtr.ToString());
+            Debug.Log("[ExportPicFromFrame] pixelPtr" + pixelPtr.ToString());
             IntPtr testPtr = NativeAdapter.PicFromDoc(rawImageTexture.width, rawImageTexture.height, pixelPtr);
-            Debug.Log("pixelPtr" + pixelPtr.ToString());
-            Debug.Log("testPtr" + testPtr.ToString() + " test2: " + NativeAdapter._GetResultPicBuffer());
+            Debug.Log("[ExportPicFromFrame] testPtr" + testPtr.ToString() + " test2: " + NativeAdapter._GetResultPicBuffer());
 
             int nativeH = NativeAdapter.PicBufferRows();
             int nativeW = NativeAdapter.PicBufferCols();
@@ -207,20 +228,23 @@ public class ARTestController : MonoBehaviour
             w = nativeW;
             h = nativeH;
 
-            Debug.Log($"Result w: {w} h: {h} nativeW: {nativeW} nativeH: {nativeH}");
+            Debug.Log($"[ExportPicFromFrame] Result w: {w} h: {h} nativeW: {nativeW} nativeH: {nativeH}");
             // Resources.UnloadUnusedAssets();
 
             int bufferSize = w * h * 4;
 
             if (testPtr != IntPtr.Zero && bufferSize > 0)
             {
+                Debug.Log($"[ExportPicFromFrame] testPtr not zero, buffersize: {bufferSize}");
                 resultTexture = new Texture2D(w, h, TextureFormat.ARGB32, false);
                 byte[] rawData = new byte[bufferSize];
                 Marshal.Copy(pixelPtr, rawData, 0, bufferSize);
 
                 resultTexture.LoadRawTextureData(rawData);
                 resultTexture.Apply();
+                Debug.Log($"[ExportPicFromFrame] resultTexture ready, is null? {resultTexture == null}");
             } else {
+                Debug.Log($"[ExportPicFromFrame] testPtr zero or buffersize <= 0: {bufferSize}");
                 return null;
             }
         } catch (System.Exception e) {
@@ -230,6 +254,7 @@ public class ARTestController : MonoBehaviour
             if (pixelHandle != null) {
                 pixelHandle.Free();
             }
+            Resources.UnloadUnusedAssets();
             GC.Collect();
             GC.SuppressFinalize(this);
         }

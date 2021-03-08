@@ -42,7 +42,7 @@ unsigned char* ExportPicFromDoc(int width, int height, unsigned char* buffer) {
 //    imshow("temp", img);
     // fast release
 
-    int maxImgWidth = 1000;
+    int maxImgWidth = 800;
     float ratio = float(maxImgWidth) / img.size().height;
 
     Mat smallImg = Mat(int(img.size().width * ratio), maxImgWidth, CV_8UC4);

@@ -22,11 +22,15 @@ public class ARTestController : MonoBehaviour
     XRCpuImage xrCpuImage;
 
     string externalDir;
+    int frameCnt;
+
+    const int FRAME_SKIP_CNT = 24;
     // Start is called before the first frame update
     void Start()
     {
         arCamManager.frameReceived += OnFrameReceived;
         OutImage.enabled = false;
+        frameCnt = 0;
         // externalDir = GetAndroidContextExternalFilesDir();
     }
 
@@ -66,7 +70,7 @@ public class ARTestController : MonoBehaviour
 
     void OnFrameReceived(ARCameraFrameEventArgs eventArgs)
     {
-        if (arCamManager.TryAcquireLatestCpuImage(out XRCpuImage xrCpuImage))
+        if (frameCnt % FRAME_SKIP_CNT == 0 && arCamManager.TryAcquireLatestCpuImage(out XRCpuImage xrCpuImage))
         {
             using (xrCpuImage)
             {
@@ -145,6 +149,8 @@ public class ARTestController : MonoBehaviour
                             Debug.Log($"[OnFrameReceived] Saved at fullDestination = {fullDestination}");
                         #endif
 
+
+                        Debug.Log("[OnFrameReceived] Start ExportPicFromFrame processing.");
                         Texture2D resultTexture2D = ExportPicFromFrame(this.texture2d);
                         if (resultTexture2D != null) {
                             Debug.Log($"[OnFrameReceived] Doc texture {resultTexture2D.width} X {resultTexture2D.height}");
@@ -172,11 +178,15 @@ public class ARTestController : MonoBehaviour
                     texture2d = null;
                 }
             }
+        } else if(frameCnt % FRAME_SKIP_CNT != 0) {
+            Debug.Log("[OnFrameReceived] Skip ExportPicFromFrame processing for performance issue.");
         }
         else
         {
             Debug.Log($"[OnFrameReceived] {Time.realtimeSinceStartup} Could not acquire cpu image.");
         }
+
+        frameCnt ++;
     }
 
     Texture2D rotateTexture(Texture2D originalTexture, bool clockwise)

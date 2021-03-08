@@ -228,6 +228,14 @@ extern "C" {
             }
         }
 
+        if (abs(topLeft.x - topRight.x) == 0 || abs(bottomLeft.x - bottomRight.x) == 0 ||
+            abs(topLeft.y - bottomLeft.y) == 0 || abs(topRight.y - bottomRight.y) == 0) {
+            picRows = 0;
+            picCols = 0;
+            smallImg.release();
+            return 0;
+        }
+
         unsigned long padding = 10;
         topLeft.x += padding;
         topLeft.y += padding;

@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class csTransform : MonoBehaviour
 {
+    public GameObject obj;
+    public int speed2;
+    public Color color;
+    public GameObject[] objs;
+
     float speed = 20.0f;
     float rotSpeed = 1.0f;
     // Start is called before the first frame update
@@ -25,5 +30,9 @@ public class csTransform : MonoBehaviour
         transform.Translate(Vector3.right * h);
         transform.Translate(Vector3.forward * v);
         transform.Rotate(Vector3.up * mouseX);
+    }
+
+    public void Click() {
+        Debug.Log("click!!");
     }
 }

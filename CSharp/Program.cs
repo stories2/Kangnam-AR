@@ -43,6 +43,10 @@ namespace CSharp
             return sum;
         }
 
+        static void DefaultParam(int a, int b = 0, int c = 0) {
+            Console.WriteLine($"a = {a} b = {b} c = {c}");
+        }
+
         static void Main(string[] args)
         {
             WriteLine("Hello World!");
@@ -114,6 +118,8 @@ namespace CSharp
 
             WriteLine($"Sum = {Sum(1, 2, 3, 4, 5)}");
             WriteLine($"Sum = {Sum(1.1f, 2.2f, 3.3f, 4.4f, 5.5f)}");
+
+            DefaultParam(a: 2, c: 3);
         }
     }
 }

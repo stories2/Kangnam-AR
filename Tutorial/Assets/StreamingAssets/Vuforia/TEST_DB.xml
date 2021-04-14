@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
-  <Tracking>
-    <ImageTarget name="73e64e8245449b03a3e1d425880510c2" size="1.000000 1.095238" />
-    <ImageTarget name="IMG_0685" size="2.000000 1.408660" />
-    <ImageTarget name="untitled_artwork" size="2480.000000 3508.000000" />
-  </Tracking>
+<QCARConfig>
+    <Tracking>
+        <ImageTarget name="73e64e8245449b03a3e1d425880510c2" size="1.000000 1.095238"/>
+        <ImageTarget name="IMG_0685" size="2.000000 1.408660"/>
+        <ImageTarget name="untitled_artwork" size="2480.000000 3508.000000"/>
+        <ImageTarget name="merge_cube.Top" size="2.000000 2.000000"/>
+        <ImageTarget name="merge_cube.Bottom" size="2.000000 2.000000"/>
+        <ImageTarget name="merge_cube.Front" size="2.000000 2.000000"/>
+        <ImageTarget name="merge_cube.Right" size="2.000000 2.000000"/>
+        <ImageTarget name="merge_cube.Back" size="2.000000 2.000000"/>
+        <ImageTarget name="merge_cube.Left" size="2.000000 2.000000"/>
+        <MultiTarget name="merge_cube">
+            <Part name="merge_cube.Left" translation="-1.0 0 0" rotation="AD: 0 1 0 -90"/>
+            <Part name="merge_cube.Right" translation="1.0 0 0" rotation="AD: 0 1 0 90"/>
+            <Part name="merge_cube.Front" translation="0 0 1.0" rotation="AD: 1 0 0 0"/>
+            <Part name="merge_cube.Back" translation="0 0 -1.0" rotation="AD: 0 1 0 180"/>
+            <Part name="merge_cube.Top" translation="0 1.0 0" rotation="AD: 1 0 0 -90"/>
+            <Part name="merge_cube.Bottom" translation="0 -1.0 0" rotation="AD: 1 0 0 90"/>
+        </MultiTarget>
+    </Tracking>
 </QCARConfig>
